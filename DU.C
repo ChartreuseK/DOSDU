@@ -1,4 +1,4 @@
-/*  DOSDU utility 0.1
+/*  DOSDU utility 0.1.1
  *   - 2023 Chartreuse Kitsune.
  *   Licensed under the 3BSD license, see LICENSE.TXT
  *
@@ -38,6 +38,9 @@
  * Requires dir.h for findfirst/findnext, curdir/curdisk, and getfat
  *          dos.h for the FA_* defines and more.
  * Developed on DOS for DOS.
+ *
+ * Changelog:
+ *   0.1.1 - Fixed bug with relative paths when in root of drive
  */
 
 #include <stdio.h>
@@ -102,22 +105,24 @@ int main(int argc, char **argv)
     }
 
 	drive = getdisk();
-   	sprintf(curdir, "%c:\\", 'A'+drive);
+   	sprintf(curdir, "%c:", 'A'+drive);
 	getcurdir(0, curdir+3);
 
     if (dirarg && (strcmp(dirarg, ".") != 0)) {
     	/* User specifed a directory, turn it into a complete path */
         if (dirarg[0] == '\\') {
         	/* Absolute path on current drive */
-            strcpy(curdir+3, dirarg+1);
+            strcpy(curdir+2, dirarg);
         } else if (dirarg[1] == ':') {
         	/* Drive has possibly been specified, absolute path */
             curdir[0] = dirarg[0];
             /* Allow C:TEST type paths and C:\TEST */
             if (dirarg[2] == '\\')
-			   	strcpy(curdir+3, dirarg+3);
-            else
+			   	strcpy(curdir+2, dirarg+2);
+            else {
+            	curdir[2] = '\\';
             	strcpy(curdir+3, dirarg+2);
+            }
         } else {
         	/* Relative path to current dir */
             if ((strlen(dirarg) + strlen(curdir) + 1) > MAXPATH) {
@@ -135,7 +140,7 @@ int main(int argc, char **argv)
     if (curdir[i] == '\\') {
        	curdir[i] = 0;
 	}
-
+	puts(curdir);
     /* Get the drive's cluster size */
 	getfat(drive+1, &fat);
     cluster_size = (long)fat.fi_bysec * (long)fat.fi_sclus;
@@ -165,7 +170,7 @@ void usage()
     puts("\t/S - Displays the summary of directory and 1st level subdirs.");
     puts("\t/O - Displays the summary of only the specified directory.");
     puts("\t/D - Displays the size on disk, rather than actual file size.");
-    puts("Version 0.1   - 2023 Chartreuse - 3BSD licensed");
+    puts("Version 0.1.1  - 2023 Chartreuse - 3BSD licensed");
     puts("");
 }
 
