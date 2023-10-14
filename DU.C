@@ -28,6 +28,12 @@
  *  display anything about its subdirectories the /O option can be used.
  *  This will just display a summary of the specified directory.
  *
+ *  For human readible sizes the /H option may be used. This will take the
+ *  size to the nearest SI prefix of bytes, B for bytes, k for kilobytes,
+ *  M for megabytes, etc. These are using 1000 based units rather than 1024
+ *  to align more to how hard drives are normally sold. Currently the code
+ *  rounds the value down to the nearest whole unit.
+ *
  * Written in Borland C++ 3.1, though should compile in earlier versions.
  * Requires dir.h for findfirst/findnext, curdir/curdisk, and getfat
  *          dos.h for the FA_* defines and more.
